@@ -1,0 +1,378 @@
+.title {
+  font-size: 100px;
+  letter-spacing: -1.68px;
+  margin: 40px 0;
+
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+
+.settings-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--text-h);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+  text-align: left;
+}
+
+.settings-dialog::backdrop {
+  background: rgb(0 0 0 / 60%);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-form h2 {
+  margin: 0;
+}
+
+.settings-form p {
+  color: var(--text);
+}
+
+.settings-field,
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-field select {
+  font: inherit;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-h);
+  background: var(--bg);
+}
+
+.settings-field input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.settings-actions {
+  justify-content: flex-end;
+}
+
+.settings-actions .button {
+  margin-bottom: 0;
+}
+
+
+.button-main {
+  font-size: 32px;
+  padding: 16px 16px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.button {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+.game {
+  padding: 24px 16px;
+}
+
+.word-board {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 480px);
+  margin: 0 0 24px;
+}
+
+.word-row {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.word-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  box-sizing: border-box;
+  color: var(--text-h);
+  font-size: clamp(24px, 10vw, 32px);
+  font-weight: 600;
+}
+
+.word-tile.submitted {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.row-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: text;
+  font-size: 16px;
+}
+
+.word-row.active .word-tile {
+  border-color: var(--accent-border);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#guess-status {
+  min-height: 1.5em;
+  margin: 16px 0;
+}
+.button-main:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.result-content {
+  display: grid;
+  gap: 20px;
+  text-align: center;
+}
+
+.result-content h2 {
+  margin: 0;
+}
+
+.result-content strong {
+  color: var(--accent);
+  font-size: 1.3em;
+  overflow-wrap: anywhere;
+}
+
+.result-symbol {
+  font-size: 48px;
+  line-height: 1.2;
+}
+
+.result-dialog[open] {
+  animation: result-appear 320ms ease-out both;
+}
+
+.result-dialog[open]::backdrop {
+  animation: result-backdrop 220ms ease-out both;
+}
+
+.result-dialog.won .result-symbol {
+  animation: celebrate 600ms ease-out both;
+}
+
+@keyframes result-appear {
+  from { opacity: 0; transform: translateY(14px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes result-backdrop {
+  from { background: rgb(0 0 0 / 0%); }
+  to { background: rgb(0 0 0 / 60%); }
+}
+
+@keyframes celebrate {
+  0% { transform: scale(0.5) rotate(-15deg); }
+  65% { transform: scale(1.2) rotate(8deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-dialog[open],
+  .result-dialog[open]::backdrop,
+  .result-dialog.won .result-symbol {
+    animation: none;
+  }
+}
+
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: clamp(24px, 5vw, 72px);
+  margin-top: 28px;
+  text-align: left;
+}
+
+.guess-panel {
+  min-width: 0;
+}
+
+.kana-table {
+  width: 100%;
+  table-layout: fixed;
+  border-spacing: 4px;
+  text-align: center;
+}
+
+.kana-table caption {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-bottom: 12px;
+}
+
+.kana-key {
+  height: 30px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.kana-key span {
+  display: block;
+}
+
+.kana-gap {
+  border: 0;
+  padding: 0;
+}
+
+.kana-key.absent,
+.legend-swatch.absent {
+  background: #40444b;
+  border-color: #40444b;
+  color: #fff;
+}
+
+.kana-key.present,
+.legend-swatch.present {
+  background: #e6bd38;
+  border-color: #e6bd38;
+  color: #171717;
+}
+
+.kana-key.correct,
+.legend-swatch.correct {
+  background: #278447;
+  border-color: #278447;
+  color: #fff;
+}
+
+.keyboard-legend {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 16px 4px;
+  list-style: none;
+  font-size: 14px;
+}
+
+.keyboard-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+@media (max-width: 700px) {
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kana-keyboard {
+    width: min(100%, 300px);
+  }
+}
