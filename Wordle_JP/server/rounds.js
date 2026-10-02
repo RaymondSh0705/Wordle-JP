@@ -19,7 +19,7 @@ export function isExactCommonMatch(data, word) {
         typeof value === 'string' && normalizeGuess(value) === word)));
 }
 
-export function createCommonChecker(fetchImpl = fetch) {
+export function createJishoLookup(fetchImpl = fetch) {
   const cache = new Map();
   return async (word, signal) => {
     if (cache.has(word)) return cache.get(word);
@@ -37,10 +37,25 @@ export function createCommonChecker(fetchImpl = fetch) {
     if (result.meta?.status !== 200 || !Array.isArray(result.data)) {
       throw new Error('Jisho returned an unexpected response. Please try again later.');
     }
-    const common = isExactCommonMatch(result.data, word);
-    cache.set(word, common);
-    return common;
+    cache.set(word, result.data);
+    return result.data;
   };
+}
+
+export function createCommonChecker(fetchImpl = fetch) {
+  const lookup = createJishoLookup(fetchImpl);
+  return async (word, signal) => isExactCommonMatch(await lookup(word, signal), word);
+}
+
+export function getKanjiSpelling(data, word, commonOnly = false) {
+  for (const entry of data) {
+    if (commonOnly && entry.is_common !== true) continue;
+    const form = entry.japanese?.find((item) => typeof item.reading === 'string'
+      && normalizeGuess(item.reading) === word
+      && typeof item.word === 'string' && /\p{Script=Han}/u.test(item.word));
+    if (form) return form.word;
+  }
+  return null;
 }
 
 export async function chooseTarget(words, {
@@ -67,7 +82,8 @@ export async function chooseTarget(words, {
 
 export function createRoundHandler() {
   let dictionary;
-  const isCommon = createCommonChecker();
+  const lookup = createJishoLookup();
+  const isCommon = async (word, signal) => isExactCommonMatch(await lookup(word, signal), word);
   return async (req, res, next) => {
     const url = new URL(req.url, 'http://localhost');
     if (url.pathname !== '/api/round') return next();
@@ -82,11 +98,19 @@ export function createRoundHandler() {
     }
     try {
       dictionary ??= prepareDictionary(JSON.parse(await readFile(new URL('./data/dictionary.json', import.meta.url), 'utf8')));
-      const target = await chooseTarget(dictionary[length], {
-        commonOnly: url.searchParams.get('common') === 'true',
-        isCommon,
-      });
-      send(200, { target });
+      const signal = AbortSignal.timeout(30000);
+      const commonOnly = url.searchParams.get('common') === 'true';
+      const target = await chooseTarget(dictionary[length], { commonOnly, isCommon, signal });
+      let kanji = null;
+      let kanjiNotice = '';
+      if (url.searchParams.get('kanji') === 'true') {
+        try {
+          kanji = getKanjiSpelling(await lookup(target, signal), target, commonOnly);
+        } catch {
+          kanjiNotice = 'Kanji lookup is unavailable for this round.';
+        }
+      }
+      send(200, { target, kanji, kanjiNotice });
     } catch (error) {
       const message = ['TimeoutError', 'AbortError'].includes(error.name)
         ? 'Jisho took too long to respond. Try again or turn off Common words only.'

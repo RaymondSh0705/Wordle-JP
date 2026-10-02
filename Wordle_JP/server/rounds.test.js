@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { chooseTarget, createCommonChecker, createRoundHandler, isExactCommonMatch, prepareDictionary } from './rounds.js';
+import { chooseTarget, createCommonChecker, createRoundHandler, getKanjiSpelling, isExactCommonMatch, prepareDictionary } from './rounds.js';
 import { splitKana } from '../src/kana.js';
 
 test('dictionary grouping uses the same normalized character counts as the UI', () => {
@@ -82,4 +82,18 @@ test('round API loads the real exported dictionary at every supported length', a
     assert.equal(splitKana(result.target).length, length);
     assert.ok(dictionary[length].includes(result.target));
   }
+});
+
+
+test('Kanji hint requires an exact reading and a spelling containing kanji', () => {
+  const entries = [
+    { japanese: [{ word: '今日', reading: 'きょう' }] },
+    { japanese: [{ word: 'キョウシツ', reading: 'きょうしつ' }] },
+    { is_common: true, japanese: [{ word: '教室', reading: 'きょうしつ' }] },
+  ];
+  assert.equal(getKanjiSpelling(entries, 'きょうしつ'), '教室');
+  assert.equal(getKanjiSpelling(entries, 'きょうしつ', true), '教室');
+  assert.equal(getKanjiSpelling(entries, 'きょう', true), null);
+  assert.equal(getKanjiSpelling([], 'きょうしつ'), null);
+  assert.equal(getKanjiSpelling([{ japanese: [{ reading: 'きょうしつ' }] }], 'きょうしつ'), null);
 });

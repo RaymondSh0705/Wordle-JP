@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { normalizeGuess, splitKana } from './kana.js'
-import { getKeyboardStatuses, getRoundOutcome, MAX_GUESSES } from './game.js'
+import { getKeyboardStatuses, getRoundOutcome, scoreGuess, MAX_GUESSES } from './game.js'
 import KanaKeyboard from './KanaKeyboard.jsx'
 import './App.css'
 
@@ -12,6 +12,8 @@ function App() {
   const committedGuess = useRef('');
   const [inputError, setInputError] = useState('');
   const [targetWord, setTargetWord] = useState(null);
+  const [kanjiHint, setKanjiHint] = useState(null);
+  const [kanjiNotice, setKanjiNotice] = useState('');
   const [roundLoading, setRoundLoading] = useState(false);
   const [roundError, setRoundError] = useState('');
   const roundRequest = useRef(null);
@@ -25,6 +27,8 @@ function App() {
     hardMode: false,
     showHints: true,
     commonOnly: false,
+    kanjiMod: false,
+    bubbleMod: false,
   });
   const [draftSettings, setDraftSettings] = useState(gameSettings);
 
@@ -100,6 +104,7 @@ function App() {
       const query = new URLSearchParams({
         length: String(gameSettings.wordLength),
         common: String(gameSettings.commonOnly),
+        kanji: String(gameSettings.kanjiMod),
       });
       const response = await fetch(`/api/round?${query}`, {
         signal: AbortSignal.any([controller.signal, AbortSignal.timeout(35000)]),
@@ -111,6 +116,8 @@ function App() {
       }
       resultDialog.current?.close();
       setTargetWord(normalizeGuess(data.target));
+      setKanjiHint(data.kanji ?? null);
+      setKanjiNotice(data.kanjiNotice ?? '');
       setGuesses([]);
       setCurrentGuess('');
       committedGuess.current = '';
@@ -206,20 +213,26 @@ function App() {
         <p id="guess-help">Enter {gameSettings.wordLength} kana per guess. Type to fill the active row.</p>
         <div className="game-layout">
           <section className="guess-panel" aria-label="Your guesses">
+            {gameSettings.kanjiMod && (
+              <p className="kanji-hint">Kanji: <strong lang="ja">{kanjiHint}</strong>{!kanjiHint && (kanjiNotice || 'No kanji spelling available for this word.')}</p>
+            )}
+            {gameSettings.bubbleMod && <p className="mod-note">Bubble: adjacent keys reveal whether their kana is in the word.</p>}
+            <div className="board-scroll">
             <div className="word-board" role="group" aria-label="Guess board">
               {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
                 const letters = splitKana(guesses[rowIndex] ?? (
                   rowIndex === guesses.length ? (compositionPreview ?? currentGuess) : ''
                 ));
+                const scores = rowIndex < guesses.length ? scoreGuess(guesses[rowIndex], targetWord) : [];
                 return (
                   <div
                     key={rowIndex}
                     className={`word-row${rowIndex === guesses.length && !outcome ? ' active' : ''}`}
                     role="group"
                     aria-label={`Guess ${rowIndex + 1}`}
-                    style={{ gridTemplateColumns: `repeat(${gameSettings.wordLength}, minmax(0, 1fr))` }}>
+                    style={{ gridTemplateColumns: `repeat(${gameSettings.wordLength}, var(--tile-size))` }}>
                     {Array.from({ length: gameSettings.wordLength }, (_, columnIndex) => (
-                      <span key={columnIndex} className={`word-tile${rowIndex < guesses.length ? ' submitted' : ''}`} aria-hidden={rowIndex === guesses.length}>
+                      <span key={columnIndex} className={`word-tile${rowIndex < guesses.length ? ` submitted ${scores[columnIndex]}` : ''}`} aria-hidden={rowIndex === guesses.length}>
                         {letters[columnIndex] || ''}
                       </span>
                     ))}
@@ -265,6 +278,7 @@ function App() {
                 );
               })}
             </div>
+            </div>
             <button type="button" className="button" onClick={submitGuess} disabled={Boolean(outcome) || roundLoading}>
               Submit guess
             </button>
@@ -280,7 +294,7 @@ function App() {
               Back to home
             </button>
           </section>
-          <KanaKeyboard statuses={getKeyboardStatuses(guesses, targetWord)} />
+          <KanaKeyboard statuses={getKeyboardStatuses(guesses, targetWord, gameSettings.bubbleMod)} bubble={gameSettings.bubbleMod} />
         </div>
       </main>
     );
@@ -292,11 +306,9 @@ function App() {
       <dialog
         ref={settingsDialog}
         className="settings-dialog"
-        aria-labelledby="settings-title"
-        aria-describedby="settings-description">
+        aria-labelledby="settings-description">
         <form onSubmit={saveSettings} className="settings-form">
-          <h2 id="settings-title">Settings</h2>
-          <p id="settings-description">Game Settings</p>
+          <h2 id="settings-description">Game Settings</h2>
           <label className="settings-field">
             Word length
             <select
@@ -345,6 +357,19 @@ function App() {
               })}
             />
           </label>
+          <fieldset className="settings-mods">
+            <legend>Mods</legend>
+            <label className="settings-field">
+              <span>Kanji<small>Show a kanji spelling of the target word.</small></span>
+              <input type="checkbox" checked={draftSettings.kanjiMod}
+                onChange={(event) => setDraftSettings({ ...draftSettings, kanjiMod: event.target.checked })} />
+            </label>
+            <label className="settings-field">
+              <span>Bubble<small>Reveal presence for keys directly above, below, left, and right of guessed kana. Empty spaces stop the reveal.</small></span>
+              <input type="checkbox" checked={draftSettings.bubbleMod}
+                onChange={(event) => setDraftSettings({ ...draftSettings, bubbleMod: event.target.checked })} />
+            </label>
+          </fieldset>
           <div className="settings-actions">
             <button type="button" className="button" onClick={() => settingsDialog.current.close()}>
               Cancel
@@ -355,8 +380,6 @@ function App() {
       </dialog>
       {/* Main Menu */}
       <section id="center">
-        <div className="main" id="begin">
-        </div>
         <div>
           <h1
             font-size="100px"
@@ -370,6 +393,7 @@ function App() {
             Click Start to Begin!
           </p>
         </div>
+        <div className="home-actions">
         <button
           type="button"
           className="button-main"
@@ -384,6 +408,7 @@ function App() {
           onClick={settings}>
           Settings
         </button>
+        </div>
         <p role="status">{roundLoading && gameSettings.commonOnly ? 'Checking Jisho for a common word…' : roundError}</p>
       </section>
 
@@ -392,7 +417,11 @@ function App() {
       <section id="bottom">
         <div className="main" id="instruction">
           <h2>Instructions</h2>
-          <p>How to play!</p>
+          <h3>How to play!</h3>
+          <p>~ Guess the Japanese word (kana) within 6 guesses. ~</p>
+          <p>~ The color of the tile will change to show how close your guess was to the word. ~</p>
+          <p>~ Half size kana (ょ) count as a chracter. ~</p>
+          <p>~ Use hiragana and ー. ~</p>
         </div>
       </section>
     </>

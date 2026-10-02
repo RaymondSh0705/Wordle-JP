@@ -89,3 +89,24 @@ including live conversion, without changing the native composition buffer.
 The Enter that confirms an IME conversion does not submit a guess. Overlong
 previews leave the row unchanged; an overlong committed edit restores the last
 accepted guess. Kanji previews can appear, but submitted guesses must use kana.
+
+## Mods and tile feedback
+
+Settings includes two optional mods, applied when you start a round:
+
+- **Kanji** shows a kanji spelling whose Jisho reading exactly matches the target.
+  Common-only rounds require that spelling to come from a common entry too.
+  Kana-only words show a no-spelling notice; lookup failures show an unavailable
+  notice and still allow the round to start. Multiple words can share a reading,
+  so the hint uses the first matching spelling. Jisho results are shared with the
+  common-word check to avoid an extra request for the selected target.
+- **Bubble** reveals whether the keys immediately above, below, left, and right
+  of each submitted kana occur in the target. It skips empty cells and never
+  spreads recursively. These extra hints are yellow or gray; green still requires
+  a correct-position guess.
+
+Submitted tiles turn green for exact matches and yellow for misplaced kana.
+Other submitted tiles retain their original background. Submitted outlines are
+removed. Tiles remain 75px square (the previous six-kana tile size), with the
+board centered in the left 70% on desktop. Narrow screens stack the sections and
+scroll the board horizontally instead of shrinking its tiles.

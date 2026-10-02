@@ -1,7 +1,8 @@
 .title {
-  font-size: 100px;
-  letter-spacing: -1.68px;
+  font-size: 72px;
+  letter-spacing: -1.5px;
   margin: 40px 0;
+  font: "Georgia";
 
   @media (max-width: 1024px) {
     font-size: 36px;
@@ -77,9 +78,9 @@
 
 
 .button-main {
-  font-size: 32px;
+  font-size: 24px;
   padding: 16px 16px;
-  border-radius: 5px;
+  border-radius: 32px;
   color: var(--accent);
   background: var(--accent-bg);
   border: 2px solid transparent;
@@ -98,8 +99,8 @@
 
 .button {
   font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 6px 10px;
+  border-radius: 30px;
   color: var(--accent);
   background: var(--accent-bg);
   border: 2px solid transparent;
@@ -122,7 +123,7 @@
   gap: 25px;
   place-content: center;
   place-items: center;
-  flex-grow: 1;
+  padding: 32px 20px 20px;
 
   @media (max-width: 1024px) {
     padding: 32px 20px 24px;
@@ -154,14 +155,15 @@
 }
 
 .game {
+  --tile-size: 75px;
   padding: 24px 16px;
 }
 
 .word-board {
   display: grid;
   gap: 6px;
-  width: min(100%, 480px);
-  margin: 0 0 24px;
+  width: max-content;
+  margin: 0 auto;
 }
 
 .word-row {
@@ -186,7 +188,7 @@
 
 .word-tile.submitted {
   background: var(--accent-bg);
-  border-color: var(--accent-border);
+  border-color: transparent;
 }
 
 .row-input {
@@ -215,6 +217,7 @@
   min-height: 1.5em;
   margin: 16px 0;
 }
+
 .button-main:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -254,22 +257,43 @@
 }
 
 @keyframes result-appear {
-  from { opacity: 0; transform: translateY(14px) scale(0.92); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes result-backdrop {
-  from { background: rgb(0 0 0 / 0%); }
-  to { background: rgb(0 0 0 / 60%); }
+  from {
+    background: rgb(0 0 0 / 0%);
+  }
+
+  to {
+    background: rgb(0 0 0 / 60%);
+  }
 }
 
 @keyframes celebrate {
-  0% { transform: scale(0.5) rotate(-15deg); }
-  65% { transform: scale(1.2) rotate(8deg); }
-  100% { transform: scale(1) rotate(0); }
+  0% {
+    transform: scale(0.5) rotate(-15deg);
+  }
+
+  65% {
+    transform: scale(1.2) rotate(8deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .result-dialog[open],
   .result-dialog[open]::backdrop,
   .result-dialog.won .result-symbol {
@@ -280,15 +304,21 @@
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
   align-items: start;
-  gap: clamp(24px, 5vw, 72px);
+  gap: 0;
   margin-top: 28px;
   text-align: left;
 }
 
 .guess-panel {
   min-width: 0;
+  text-align: center;
+}
+
+.kana-keyboard {
+  width: min(100%, 260px);
+  justify-self: center;
 }
 
 .kana-table {
@@ -374,5 +404,94 @@
 
   .kana-keyboard {
     width: min(100%, 300px);
+  }
+}
+
+.home-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.home-actions .button-main {
+  margin: 0;
+  font-size: clamp(20px, 4vw, 32px);
+}
+
+#center>p:empty {
+  display: none;
+}
+
+#bottom {
+  padding: 24px 20px 40px;
+}
+
+.settings-mods {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.settings-mods legend {
+  color: var(--text-h);
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.settings-mods small {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.settings-mods input {
+  flex-shrink: 0;
+}
+
+.board-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 6px 0;
+  margin-bottom: 24px;
+}
+
+.word-tile {
+  width: var(--tile-size);
+  height: var(--tile-size);
+}
+
+.word-tile.submitted.correct {
+  background: #278447;
+  color: #fff;
+}
+
+.word-tile.submitted.present {
+  background: #e6bd38;
+  color: #171717;
+}
+
+.kanji-hint {
+  margin-bottom: 20px;
+}
+
+.kanji-hint strong {
+  color: var(--text-h);
+  font-size: 28px;
+}
+
+.mod-note {
+  margin: 0 12px 16px;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .game-layout {
+    gap: 28px;
   }
 }

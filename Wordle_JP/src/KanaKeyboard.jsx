@@ -1,23 +1,4 @@
-const KANA_ROWS = [
-  ['あ', 'い', 'う', 'え', 'お'],
-  ['か', 'き', 'く', 'け', 'こ'],
-  ['が', 'ぎ', 'ぐ', 'げ', 'ご'],
-  ['さ', 'し', 'す', 'せ', 'そ'],
-  ['ざ', 'じ', 'ず', 'ぜ', 'ぞ'],
-  ['た', 'ち', 'つ', 'て', 'と'],
-  ['だ', 'ぢ', 'づ', 'で', 'ど'],
-  ['は', 'ひ', 'ふ', 'へ', 'ほ'],
-  ['ば', 'び', 'ぶ', 'べ', 'ぼ'],
-  ['ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ'],
-  ['な', 'に', 'ぬ', 'ね', 'の'],
-  ['ま', 'み', 'む', 'め', 'も'],
-  ['や', '', 'ゆ', '', 'よ'],
-  ['ら', 'り', 'る', 'れ', 'ろ'],
-  ['わ', '', '', '', 'を'],
-  ['ん', '', '', '', ''],
-  ['ゃ', '', 'ゅ', '', 'ょ'],
-  ['っ', 'ー', '', '', ''],
-];
+import { KANA_ROWS } from './keyboardLayout.js';
 
 const STATUS_LABELS = {
   absent: 'not in the word',
@@ -25,7 +6,7 @@ const STATUS_LABELS = {
   correct: 'correct position',
 };
 
-export default function KanaKeyboard({ statuses }) {
+export default function KanaKeyboard({ statuses, bubble = false }) {
   // Keep the requested layout; show any additional guessed kana below it.
   const extras = Object.keys(statuses).filter((kana) => !KANA_ROWS.flat().includes(kana));
   const rows = [...KANA_ROWS];
@@ -40,7 +21,7 @@ export default function KanaKeyboard({ statuses }) {
             <tr key={index}>
               {row.map((kana, column) => (
                 <td key={column} className={kana ? `kana-key ${statuses[kana] ?? ''}` : 'kana-gap'}>
-                  {kana && <span aria-label={`${kana}: ${STATUS_LABELS[statuses[kana]] ?? 'not guessed'}`}>
+                  {kana && <span aria-label={`${kana}: ${bubble && statuses[kana] === 'present' ? 'in the word, position not confirmed' : STATUS_LABELS[statuses[kana]] ?? 'not guessed'}`}>
                     {kana}
                   </span>}
                 </td>
@@ -51,7 +32,7 @@ export default function KanaKeyboard({ statuses }) {
       </table>
       <ul className="keyboard-legend">
         <li><span className="legend-swatch correct" />Correct position</li>
-        <li><span className="legend-swatch present" />Wrong position</li>
+        <li><span className="legend-swatch present" />{bubble ? 'In word / position unknown' : 'Wrong position'}</li>
         <li><span className="legend-swatch absent" />Not in word</li>
       </ul>
     </aside>
