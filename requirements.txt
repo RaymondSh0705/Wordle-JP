@@ -1,2 +1,1 @@
-pickle
 xml.etree.ElementTree
