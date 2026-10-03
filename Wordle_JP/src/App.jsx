@@ -209,7 +209,7 @@ function App() {
             </div>
           </div>
         </dialog>
-        <h1>Kana Wordle</h1>
+        <h1 className="game-title">KANADLE</h1>
         <p id="guess-help">Enter {gameSettings.wordLength} kana per guess. Type to fill the active row.</p>
         <div className="game-layout">
           <section className="guess-panel" aria-label="Your guesses">
@@ -218,68 +218,68 @@ function App() {
             )}
             {gameSettings.bubbleMod && <p className="mod-note">Bubble: adjacent keys reveal whether their kana is in the word.</p>}
             <div className="board-scroll">
-            <div className="word-board" role="group" aria-label="Guess board">
-              {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
-                const letters = splitKana(guesses[rowIndex] ?? (
-                  rowIndex === guesses.length ? (compositionPreview ?? currentGuess) : ''
-                ));
-                const scores = rowIndex < guesses.length ? scoreGuess(guesses[rowIndex], targetWord) : [];
-                return (
-                  <div
-                    key={rowIndex}
-                    className={`word-row${rowIndex === guesses.length && !outcome ? ' active' : ''}`}
-                    role="group"
-                    aria-label={`Guess ${rowIndex + 1}`}
-                    style={{ gridTemplateColumns: `repeat(${gameSettings.wordLength}, var(--tile-size))` }}>
-                    {Array.from({ length: gameSettings.wordLength }, (_, columnIndex) => (
-                      <span key={columnIndex} className={`word-tile${rowIndex < guesses.length ? ` submitted ${scores[columnIndex]}` : ''}`} aria-hidden={rowIndex === guesses.length}>
-                        {letters[columnIndex] || ''}
-                      </span>
-                    ))}
-                    {rowIndex === guesses.length && !outcome && (
-                      <input
-                        ref={guessInput}
-                        className="row-input"
-                        type="text"
-                        lang="ja"
-                        aria-label={`Guess ${rowIndex + 1}, ${gameSettings.wordLength} kana`}
-                        aria-describedby="guess-help guess-status"
-                        aria-invalid={Boolean(inputError)}
-                        defaultValue={currentGuess}
-                        autoComplete="off"
-                        autoCapitalize="off"
-                        spellCheck={false}
-                        onInput={(event) => {
-                          if (isComposing.current || event.nativeEvent.isComposing) {
-                            previewComposition(event.currentTarget);
-                          } else {
+              <div className="word-board" role="group" aria-label="Guess board">
+                {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
+                  const letters = splitKana(guesses[rowIndex] ?? (
+                    rowIndex === guesses.length ? (compositionPreview ?? currentGuess) : ''
+                  ));
+                  const scores = rowIndex < guesses.length ? scoreGuess(guesses[rowIndex], targetWord) : [];
+                  return (
+                    <div
+                      key={rowIndex}
+                      className={`word-row${rowIndex === guesses.length && !outcome ? ' active' : ''}`}
+                      role="group"
+                      aria-label={`Guess ${rowIndex + 1}`}
+                      style={{ gridTemplateColumns: `repeat(${gameSettings.wordLength}, var(--tile-size))` }}>
+                      {Array.from({ length: gameSettings.wordLength }, (_, columnIndex) => (
+                        <span key={columnIndex} className={`word-tile${rowIndex < guesses.length ? ` submitted ${scores[columnIndex]}` : ''}`} aria-hidden={rowIndex === guesses.length}>
+                          {letters[columnIndex] || ''}
+                        </span>
+                      ))}
+                      {rowIndex === guesses.length && !outcome && (
+                        <input
+                          ref={guessInput}
+                          className="row-input"
+                          type="text"
+                          lang="ja"
+                          aria-label={`Guess ${rowIndex + 1}, ${gameSettings.wordLength} kana`}
+                          aria-describedby="guess-help guess-status"
+                          aria-invalid={Boolean(inputError)}
+                          defaultValue={currentGuess}
+                          autoComplete="off"
+                          autoCapitalize="off"
+                          spellCheck={false}
+                          onInput={(event) => {
+                            if (isComposing.current || event.nativeEvent.isComposing) {
+                              previewComposition(event.currentTarget);
+                            } else {
+                              updateGuess(event.currentTarget);
+                            }
+                          }}
+                          onCompositionStart={() => {
+                            isComposing.current = true;
+                            setCompositionPreview(committedGuess.current);
+                          }}
+                          onCompositionUpdate={(event) => previewComposition(event.currentTarget)}
+                          onCompositionEnd={(event) => {
+                            isComposing.current = false;
                             updateGuess(event.currentTarget);
-                          }
-                        }}
-                        onCompositionStart={() => {
-                          isComposing.current = true;
-                          setCompositionPreview(committedGuess.current);
-                        }}
-                        onCompositionUpdate={(event) => previewComposition(event.currentTarget)}
-                        onCompositionEnd={(event) => {
-                          isComposing.current = false;
-                          updateGuess(event.currentTarget);
-                          setCompositionPreview(null);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key !== 'Enter') return;
-                          if (isComposing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
-                          event.preventDefault();
-                          submitGuess();
-                        }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+                            setCompositionPreview(null);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key !== 'Enter') return;
+                            if (isComposing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+                            event.preventDefault();
+                            submitGuess();
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            </div>
-            <button type="button" className="button" onClick={submitGuess} disabled={Boolean(outcome) || roundLoading}>
+            <button type="button" className="button-game" onClick={submitGuess} disabled={Boolean(outcome) || roundLoading}>
               Submit guess
             </button>
             <p id="guess-status" role="status">
@@ -289,7 +289,7 @@ function App() {
             </p>
             <button
               type="button"
-              className="button"
+              className="button-game"
               onClick={goHome}>
               Back to home
             </button>
@@ -384,7 +384,7 @@ function App() {
           <h1
             font-size="100px"
             className="title">
-            Kotobadle
+            KANADLE
           </h1>
           <p>
             Start クリックしてください
@@ -394,20 +394,20 @@ function App() {
           </p>
         </div>
         <div className="home-actions">
-        <button
-          type="button"
-          className="button-main"
-          disabled={roundLoading}
-          onClick={startGame}>
-          {roundLoading ? 'Choosing a word…' : 'Start!'}
-        </button>
-        <button
-          type="button"
-          className="button-main"
-          disabled={roundLoading}
-          onClick={settings}>
-          Settings
-        </button>
+          <button
+            type="button"
+            className="button-main"
+            disabled={roundLoading}
+            onClick={startGame}>
+            {roundLoading ? 'Choosing a word…' : 'Start!'}
+          </button>
+          <button
+            type="button"
+            className="button-main"
+            disabled={roundLoading}
+            onClick={settings}>
+            Settings
+          </button>
         </div>
         <p role="status">{roundLoading && gameSettings.commonOnly ? 'Checking Jisho for a common word…' : roundError}</p>
       </section>

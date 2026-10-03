@@ -2,7 +2,21 @@
   font-size: 72px;
   letter-spacing: -1.5px;
   margin: 40px 0;
-  font: "Georgia";
+  font-family: Georgia;
+  font-weight: bold;
+
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+
+.game-title {
+  font-size: 50px;
+  letter-spacing: -1.5px;
+  margin: 15px 0;
+  font-family: Georgia;
+  font-weight: bold;
 
   @media (max-width: 1024px) {
     font-size: 36px;
@@ -78,7 +92,7 @@
 
 
 .button-main {
-  font-size: 24px;
+  font-size: 20px;
   padding: 16px 16px;
   border-radius: 32px;
   color: var(--accent);
@@ -102,6 +116,27 @@
   padding: 6px 10px;
   border-radius: 30px;
   color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.button-game {
+  font-size: 20px;
+  padding: 10px 12px;
+  border-radius: 30px;
+  color: var(--accent);
+  margin: 2px 2px;
   background: var(--accent-bg);
   border: 2px solid transparent;
   transition: border-color 0.3s;
