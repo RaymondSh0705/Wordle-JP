@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dictionary": "python3 scripts/export_dictionary.py",
-    "test": "node --test src/kana.test.js src/game.test.js server/rounds.test.js",
+    "dictionary": "python3 scripts/export_dictionary.py && node scripts/prepare_dictionary.js",
+    "test": "node --test src/kana.test.js src/game.test.js server/rounds.test.js worker/worker.test.js",
     "start": "node server/index.js",
     "dev": "vite",
     "build": "vite build",
@@ -21,6 +21,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.147.0"
   }
 }

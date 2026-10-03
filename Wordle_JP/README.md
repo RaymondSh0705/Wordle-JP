@@ -28,8 +28,9 @@ npm run dictionary
 
 Restart the dev or production server after exporting, because it caches the word
 list in memory. The exporter uses Python 3 and accepts only plain dictionary data.
-The Node server normalizes readings, deduplicates them, removes non-kana entries,
-and groups them using the same rules as the board. Every normalized character occupies one tile, including small kana: `きゃ` uses
+The export command then runs `scripts/prepare_dictionary.js` to normalize readings,
+deduplicate them, remove non-kana entries, and group them using the same rules as
+the board. Both server runtimes consume this prepared JSON directly. Every normalized character occupies one tile, including small kana: `きゃ` uses
 two tiles and `きょうしつ` uses five. This matches the updated Python dictionary.
 
 ## Common-word lookup
@@ -110,3 +111,28 @@ Other submitted tiles retain their original background. Submitted outlines are
 removed. Tiles remain 75px square (the previous six-kana tile size), with the
 board centered in the left 70% on desktop. Narrow screens stack the sections and
 scroll the board horizontally instead of shrinking its tiles.
+
+## Cloudflare Worker adapter
+
+Steps 1 and 2 of the Cloudflare migration are implemented:
+
+- `worker/index.js` exports a Worker with `fetch(request, env)`. Its static JSON
+  import packages the prepared dictionary with the Worker; it never reads local
+  files at runtime.
+- `worker/handler.js` routes `/api/round` to the shared API and delegates frontend
+  requests to `env.ASSETS.fetch(request)`. Unknown API routes return JSON 404s.
+- `server/round-core.js` contains the runtime-independent round and Jisho logic.
+  `server/rounds.js` adapts this to the existing Node/Vite middleware, so local
+  development and `npm start` continue to work.
+- `npm run dictionary` exports `../dict.pkl` and prepares
+  `server/data/dictionary.json` before deployment. Keep this generated JSON with
+  the project. Neither Python nor the pickle file is needed on Cloudflare.
+
+Worker tests run under Node's Web APIs with mocked asset/Jisho bindings as part
+of `npm test`. They cover the actual Worker entry point and generated dictionary;
+they are not a Cloudflare runtime/deployment test.
+
+Wrangler installation, account login, and deployment configuration are still
+separate steps. The future configuration should use `worker/index.js` as `main`,
+`dist` as the assets directory, an `ASSETS` binding, and Worker-first routing for
+`/api/*`. No Cloudflare resources have been created or deployed.

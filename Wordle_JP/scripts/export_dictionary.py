@@ -1,4 +1,4 @@
-"""Export the local kana dictionary for the Node game server."""
+"""Export raw dictionary data; npm run dictionary then prepares it for Node and Workers."""
 import json
 import pickle
 from pathlib import Path
